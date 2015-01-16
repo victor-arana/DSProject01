@@ -22,9 +22,10 @@ public class PixImage {
   /**
    *  Define any variables associated with a PixImage object here.  These
    *  variables MUST be private.
-   */
-
-
+   */	
+	private int width;
+	private int height;
+	private int[][] image; 
 
 
   /**
@@ -35,7 +36,9 @@ public class PixImage {
    * @param height the height of the image.
    */
   public PixImage(int width, int height) {
-    // Your solution here.
+	  this.width = width;
+	  this.height = height;
+	  this.image = new int[width*height][5];
   }
 
   /**
@@ -44,8 +47,7 @@ public class PixImage {
    * @return the width of the image.
    */
   public int getWidth() {
-    // Replace the following line with your solution.
-    return 1;
+    return width;
   }
 
   /**
@@ -54,8 +56,7 @@ public class PixImage {
    * @return the height of the image.
    */
   public int getHeight() {
-    // Replace the following line with your solution.
-    return 1;
+    return height;
   }
 
   /**
@@ -66,8 +67,7 @@ public class PixImage {
    * @return the red intensity of the pixel at coordinate (x, y).
    */
   public short getRed(int x, int y) {
-    // Replace the following line with your solution.
-    return 0;
+    return (short)image[x+y*width][2];
   }
 
   /**
@@ -78,8 +78,7 @@ public class PixImage {
    * @return the green intensity of the pixel at coordinate (x, y).
    */
   public short getGreen(int x, int y) {
-    // Replace the following line with your solution.
-    return 0;
+    return (short)image[x+y*width][3];
   }
 
   /**
@@ -90,8 +89,7 @@ public class PixImage {
    * @return the blue intensity of the pixel at coordinate (x, y).
    */
   public short getBlue(int x, int y) {
-    // Replace the following line with your solution.
-    return 0;
+    return (short)image[x+y*width][4];
   }
 
   /**
@@ -108,7 +106,9 @@ public class PixImage {
    * @param blue the new blue intensity for the pixel at coordinate (x, y).
    */
   public void setPixel(int x, int y, short red, short green, short blue) {
-    // Your solution here.
+    this.image[x+width*y][2] = red;
+    this.image[x+width*y][3] = green;
+    this.image[x+width*y][4] = blue;
   }
 
   /**
@@ -127,7 +127,7 @@ public class PixImage {
 
   /**
    * boxBlur() returns a blurred version of "this" PixImage.
-   *
+   *eeeerys
    * If numIterations == 1, each pixel in the output PixImage is assigned
    * a value equal to the average of its neighboring pixels in "this" PixImage,
    * INCLUDING the pixel itself.
@@ -157,6 +157,79 @@ public class PixImage {
   public PixImage boxBlur(int numIterations) {
     // Replace the following line with your solution.
     return this;
+  }
+  
+  public int[][] neighbors(int x, int y){
+	  // Initialize neighbor array
+	  int[][] neighbors = new int[9][2];
+	  for(int i = 0; i < 9; i++){
+		  neighbors[i][0] = -1;
+		  neighbors[i][1] = -1;
+	  }
+	  if(x==0){
+		  if(y == 0){
+			  neighbors[0][0] = 0;  neighbors[0][1] = 0;
+			  neighbors[1][0] = 1;  neighbors[1][1] = 0;
+			  neighbors[2][0] = 0;  neighbors[2][1] = 1;
+			  neighbors[3][0] = 1;  neighbors[3][1] = 1;
+		  } else if(y == height - 1){
+			  neighbors[0][0] = 0;  neighbors[0][1] = height - 1 - 1;
+			  neighbors[1][0] = 1;  neighbors[1][1] = height - 1 - 1;
+			  neighbors[2][0] = 0;  neighbors[2][1] = height - 1;
+			  neighbors[3][0] = 1;  neighbors[3][1] = height - 1;
+		  } else {
+			  neighbors[0][0] = 0;  neighbors[0][1] = y - 1;
+			  neighbors[1][0] = 1;  neighbors[1][1] = y - 1;
+			  neighbors[2][0] = 0;  neighbors[2][1] = y;
+			  neighbors[3][0] = 1;  neighbors[3][1] = y;
+			  neighbors[4][0] = 1;  neighbors[4][1] = y + 1;
+			  neighbors[5][0] = 1;  neighbors[5][1] = y + 1;
+		  }
+	  } else if(x == width - 1){
+		  if(y == 0){
+			  neighbors[0][0] = width - 1 - 1;  neighbors[0][1] = 0;
+			  neighbors[1][0] = 	width - 1;  neighbors[1][1] = 0;
+			  neighbors[2][0] = width - 1 - 1;  neighbors[2][1] = 1;
+			  neighbors[3][0] = 	width - 1;  neighbors[3][1] = 1;
+		  }else if(y == height - 1 ){
+			  neighbors[0][0] = width - 1 - 1;  neighbors[0][1] = height - 1 - 1;
+			  neighbors[1][0] = 	width - 1;  neighbors[1][1] = height - 1 - 1;
+			  neighbors[2][0] = width - 1 - 1;  neighbors[2][1] = height - 1;
+			  neighbors[3][0] = 	width - 1;  neighbors[3][1] = height - 1;
+		  }else{
+			  neighbors[0][0] = width - 1;  neighbors[0][1] = y - 1;
+			  neighbors[1][0] = 	width;  neighbors[1][1] = y - 1;
+			  neighbors[2][0] = width - 1;  neighbors[2][1] = 	  y;
+			  neighbors[3][0] = 	width;  neighbors[1][1] = 	  y;
+			  neighbors[4][0] = width - 1;  neighbors[4][1] = y + 1;
+			  neighbors[5][0] = 	width;  neighbors[5][1] = y + 1;
+		  }
+	  } else if(y == 0){
+		  neighbors[0][0] = width - 1;  neighbors[0][1] = 0;
+		  neighbors[1][0] = 	width;  neighbors[1][1] = 0;
+		  neighbors[2][0] = width + 1;  neighbors[2][1] = 0;
+		  neighbors[3][0] = width - 1;  neighbors[1][1] = 1;
+		  neighbors[4][0] = 	width;  neighbors[4][1] = 1;
+		  neighbors[5][0] = width + 1;  neighbors[5][1] = 1;
+	  } else if(y == height){
+		  neighbors[0][0] = x - 1;  neighbors[0][1] = height - 1;
+		  neighbors[1][0] = 	x;  neighbors[1][1] = height - 1;
+		  neighbors[2][0] = x + 1;  neighbors[2][1] = height - 1;
+		  neighbors[3][0] = x - 1;  neighbors[1][1] = height;
+		  neighbors[4][0] = 	x;  neighbors[4][1] = height;
+		  neighbors[5][0] = x + 1;  neighbors[5][1] = height;
+	  } else {
+		  neighbors[0][0] = x - 1;  neighbors[0][1] = y - 1;
+		  neighbors[1][0] = 	x;  neighbors[1][1] = y - 1;
+		  neighbors[2][0] = x + 1;  neighbors[2][1] = y - 1;
+		  neighbors[3][0] = x - 1;  neighbors[1][1] = y;
+		  neighbors[4][0] = 	x;  neighbors[4][1] = y;
+		  neighbors[5][0] = x + 1;  neighbors[5][1] = y;
+		  neighbors[6][0] = x - 1;  neighbors[6][1] = y + 1;
+		  neighbors[7][0] = 	x;  neighbors[7][1] = y + 1;
+		  neighbors[8][0] = x + 1;  neighbors[8][1] = y + 1;
+	  }
+	  return neighbors;
   }
 
   /**
