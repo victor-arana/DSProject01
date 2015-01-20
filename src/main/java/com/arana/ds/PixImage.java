@@ -127,7 +127,7 @@ public class PixImage {
 
   /**
    * boxBlur() returns a blurred version of "this" PixImage.
-   *eeeerys
+   *
    * If numIterations == 1, each pixel in the output PixImage is assigned
    * a value equal to the average of its neighboring pixels in "this" PixImage,
    * INCLUDING the pixel itself.
@@ -155,11 +155,29 @@ public class PixImage {
    * @return a blurred version of "this" PixImage.
    */
   public PixImage boxBlur(int numIterations) {
-    // Replace the following line with your solution.
-    return this;
+	  
+	  // TODO This seems to operate only on "this" PixImage
+	  PixImage outPutPixImage = this;
+	  if(numIterations == 1){
+		  for(int i = 0; i < width; i ++){
+			  for(int j = 0; j < height; j++){			   
+				  
+				  outPutPixImage.setPixel(i, j, (short)this.avgColors(i, j)[0], (short)this.avgColors(i, j)[1], (short)this.avgColors(i, j)[2]);
+			  }
+		  }
+	  }	  
+	  // Replace the following line with your solution.
+    return outPutPixImage;
   }
   
-  public int[][] neighbors(int x, int y){
+  /**
+   * neighbors(int x, int y) returns a list containing the coordinates of each of the pixel neighborgs. With the location of the pixel at (x,y)
+   * 
+ * @param x 
+ * @param y
+ * @return a list of the neighbors of the pixel at (x,y)
+ */
+public int[][] neighbors(int x, int y){
 	  // Initialize neighbor array
 	  int[][] neighbors = new int[9][2];
 	  for(int i = 0; i < 9; i++){
@@ -168,57 +186,66 @@ public class PixImage {
 	  }
 	  if(x==0){
 		  if(y == 0){
+			  // Esquina superior izquierda
 			  neighbors[0][0] = 0;  neighbors[0][1] = 0;
 			  neighbors[1][0] = 1;  neighbors[1][1] = 0;
 			  neighbors[2][0] = 0;  neighbors[2][1] = 1;
 			  neighbors[3][0] = 1;  neighbors[3][1] = 1;
 		  } else if(y == height - 1){
+			  // Esquina inferior izquierda
 			  neighbors[0][0] = 0;  neighbors[0][1] = height - 1 - 1;
 			  neighbors[1][0] = 1;  neighbors[1][1] = height - 1 - 1;
 			  neighbors[2][0] = 0;  neighbors[2][1] = height - 1;
 			  neighbors[3][0] = 1;  neighbors[3][1] = height - 1;
 		  } else {
+			  // Borde izquierdo
 			  neighbors[0][0] = 0;  neighbors[0][1] = y - 1;
 			  neighbors[1][0] = 1;  neighbors[1][1] = y - 1;
 			  neighbors[2][0] = 0;  neighbors[2][1] = y;
 			  neighbors[3][0] = 1;  neighbors[3][1] = y;
-			  neighbors[4][0] = 1;  neighbors[4][1] = y + 1;
+			  neighbors[4][0] = 0;  neighbors[4][1] = y + 1;
 			  neighbors[5][0] = 1;  neighbors[5][1] = y + 1;
 		  }
 	  } else if(x == width - 1){
 		  if(y == 0){
+			  // Esquina superior derecha
 			  neighbors[0][0] = width - 1 - 1;  neighbors[0][1] = 0;
 			  neighbors[1][0] = 	width - 1;  neighbors[1][1] = 0;
 			  neighbors[2][0] = width - 1 - 1;  neighbors[2][1] = 1;
 			  neighbors[3][0] = 	width - 1;  neighbors[3][1] = 1;
 		  }else if(y == height - 1 ){
+			  // Esquina inferior derecha
 			  neighbors[0][0] = width - 1 - 1;  neighbors[0][1] = height - 1 - 1;
 			  neighbors[1][0] = 	width - 1;  neighbors[1][1] = height - 1 - 1;
 			  neighbors[2][0] = width - 1 - 1;  neighbors[2][1] = height - 1;
 			  neighbors[3][0] = 	width - 1;  neighbors[3][1] = height - 1;
 		  }else{
-			  neighbors[0][0] = width - 1;  neighbors[0][1] = y - 1;
-			  neighbors[1][0] = 	width;  neighbors[1][1] = y - 1;
-			  neighbors[2][0] = width - 1;  neighbors[2][1] = 	  y;
-			  neighbors[3][0] = 	width;  neighbors[1][1] = 	  y;
-			  neighbors[4][0] = width - 1;  neighbors[4][1] = y + 1;
-			  neighbors[5][0] = 	width;  neighbors[5][1] = y + 1;
+			  //  Borde derecho
+			  neighbors[0][0] = width - 1 - 1;  neighbors[0][1] = y - 1;
+			  neighbors[1][0] = 	width - 1;  neighbors[1][1] = y - 1;
+			  neighbors[2][0] = width - 1 - 1;  neighbors[2][1] = 	  y;
+			  neighbors[3][0] = 	width - 1;  neighbors[3][1] = 	  y;
+			  neighbors[4][0] = width - 1 - 1;  neighbors[4][1] = y + 1;
+			  neighbors[5][0] = 	width - 1;  neighbors[5][1] = y + 1;
 		  }
 	  } else if(y == 0){
-		  neighbors[0][0] = width - 1;  neighbors[0][1] = 0;
-		  neighbors[1][0] = 	width;  neighbors[1][1] = 0;
-		  neighbors[2][0] = width + 1;  neighbors[2][1] = 0;
-		  neighbors[3][0] = width - 1;  neighbors[1][1] = 1;
-		  neighbors[4][0] = 	width;  neighbors[4][1] = 1;
-		  neighbors[5][0] = width + 1;  neighbors[5][1] = 1;
-	  } else if(y == height){
-		  neighbors[0][0] = x - 1;  neighbors[0][1] = height - 1;
-		  neighbors[1][0] = 	x;  neighbors[1][1] = height - 1;
-		  neighbors[2][0] = x + 1;  neighbors[2][1] = height - 1;
-		  neighbors[3][0] = x - 1;  neighbors[1][1] = height;
-		  neighbors[4][0] = 	x;  neighbors[4][1] = height;
-		  neighbors[5][0] = x + 1;  neighbors[5][1] = height;
+		  // Borde superior
+		  neighbors[0][0] = x - 1;  neighbors[0][1] = 0;
+		  neighbors[1][0] = 	x;  neighbors[1][1] = 0;
+		  neighbors[2][0] = x + 1;  neighbors[2][1] = 0;
+		  neighbors[3][0] = x - 1;  neighbors[3][1] = 1;
+		  neighbors[4][0] = 	x;  neighbors[4][1] = 1;
+		  neighbors[5][0] = x + 1;  neighbors[5][1] = 1;
+	  } else if(y == height - 1){
+		  // Borde inferior
+		  neighbors[0][0] = x - 1;  neighbors[0][1] = height - 1 - 1;
+		  neighbors[1][0] = 	x;  neighbors[1][1] = height - 1 - 1;
+		  neighbors[2][0] = x + 1;  neighbors[2][1] = height - 1 - 1;
+		  neighbors[3][0] = x - 1;  neighbors[3][1] = height - 1;
+		  neighbors[4][0] = 	x;  neighbors[4][1] = height - 1;
+		  neighbors[5][0] = x + 1;  neighbors[5][1] = height - 1;
 	  } else {
+		  // Centro
 		  neighbors[0][0] = x - 1;  neighbors[0][1] = y - 1;
 		  neighbors[1][0] = 	x;  neighbors[1][1] = y - 1;
 		  neighbors[2][0] = x + 1;  neighbors[2][1] = y - 1;
@@ -230,6 +257,30 @@ public class PixImage {
 		  neighbors[8][0] = x + 1;  neighbors[8][1] = y + 1;
 	  }
 	  return neighbors;
+  }
+  
+  public int[] avgColors(int x, int y){
+	  
+	  int[] avgResult = new int[3];
+	  
+	  avgResult[0] = 0;
+	  avgResult[1] = 0;
+	  avgResult[2] = 0;
+	  
+	  int[][] vecinos = this.neighbors(x, y);
+	  int[] sums = new int[3];
+	  	  	  
+	  for(int k = 0; k < vecinos.length; k++){
+		  sums[0] = sums[0] + this.getRed(vecinos[k][0], vecinos[k][1]);
+		  sums[1] = sums[1] + this.getGreen(vecinos[k][0], vecinos[k][1]);
+		  sums[2] = sums[2] + this.getGreen(vecinos[k][0], vecinos[k][1]);
+	  }
+	  
+	  avgResult[0] = sums[0]/vecinos.length;
+	  avgResult[1] = sums[1]/vecinos.length;
+	  avgResult[2] = sums[2]/vecinos.length;	  
+	  	  
+	  return avgResult;
   }
 
   /**
