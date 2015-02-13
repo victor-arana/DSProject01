@@ -66,8 +66,13 @@ public class PixImage {
    * @param y the y-coordinate of the pixel.
    * @return the red intensity of the pixel at coordinate (x, y).
    */
-  public short getRed(int x, int y) {
-    return (short)image[x+y*width][2];
+  /**
+ * @param x
+ * @param y
+ * @return
+ */
+public short getRed(int x, int y) {
+    return (short)image[(width)*y + x][2];
   }
 
   /**
@@ -78,7 +83,7 @@ public class PixImage {
    * @return the green intensity of the pixel at coordinate (x, y).
    */
   public short getGreen(int x, int y) {
-    return (short)image[x+y*width][3];
+    return (short)image[(width)*y + x][3];
   }
 
   /**
@@ -89,7 +94,7 @@ public class PixImage {
    * @return the blue intensity of the pixel at coordinate (x, y).
    */
   public short getBlue(int x, int y) {
-    return (short)image[x+y*width][4];
+    return (short)image[(width)*y + x][4];
   }
 
   /**
@@ -106,9 +111,12 @@ public class PixImage {
    * @param blue the new blue intensity for the pixel at coordinate (x, y).
    */
   public void setPixel(int x, int y, short red, short green, short blue) {
-    this.image[x+width*y][2] = red;
-    this.image[x+width*y][3] = green;
-    this.image[x+width*y][4] = blue;
+	int location = (width)*y + x;
+	this.image[location][0] = x;
+	this.image[location][1] = y;
+    this.image[location][2] = red;
+    this.image[location][3] = green;
+    this.image[location][4] = blue;
   }
 
   /**
@@ -156,19 +164,142 @@ public class PixImage {
    */
   public PixImage boxBlur(int numIterations) {
 	  
-	  // TODO This seems to operate only on "this" PixImage
-	  PixImage outPutPixImage = this;
-	  if(numIterations == 1){
-		  for(int i = 0; i < width; i ++){
-			  for(int j = 0; j < height; j++){			   
-				  
-				  outPutPixImage.setPixel(i, j, (short)this.avgColors(i, j)[0], (short)this.avgColors(i, j)[1], (short)this.avgColors(i, j)[2]);
-			  }
+	  PixImage inputPixImage = this;
+	  PixImage outputPixImage = inputPixImage.boxBlur();
+	  
+	  while(numIterations > 1){
+		  inputPixImage = outputPixImage;
+		  outputPixImage = inputPixImage.boxBlur();
+		  numIterations--;
+	  }
+ 
+	  return outputPixImage;
+  }
+  
+  public PixImage boxBlur(){
+	  PixImage outPutPixImage = new PixImage(width, height);
+	  for(int i = 0; i < width; i ++){
+		  for(int j = 0; j < height; j++){			   
+			  
+			  outPutPixImage.setPixel(i, j, (short)this.avgColors(i, j)[0], (short)this.avgColors(i, j)[1], (short)this.avgColors(i, j)[2]);
 		  }
 	  }	  
-	  // Replace the following line with your solution.
-    return outPutPixImage;
+	  return outPutPixImage; 
   }
+  
+public int[][] neighbors(int x, int y, boolean reflection){
+	  // Initialize neighbor array
+	  int[][] neighbors = new int[9][2];
+	  for(int i = 0; i < 9; i++){
+		  neighbors[i][0] = -2;
+		  neighbors[i][1] = -2;
+	  }
+	  if(x==0){
+		  if(y == 0){
+			  // Esquina superior izquierda
+			  neighbors[0][0] = 0;  neighbors[0][1] = 0;
+			  neighbors[1][0] = 0;  neighbors[1][1] = 0;
+			  neighbors[2][0] = 1;  neighbors[2][1] = 0;
+			  neighbors[3][0] = 0;  neighbors[3][1] = 0;
+			  neighbors[4][0] = 0;  neighbors[4][1] = 0;
+			  neighbors[5][0] = 1;  neighbors[5][1] = 0;
+			  neighbors[6][0] = 0;  neighbors[6][1] = 1;
+			  neighbors[7][0] = 0;  neighbors[7][1] = 1;
+			  neighbors[8][0] = 1;  neighbors[8][1] = 1;
+		  } else if(y == height - 1){
+			  // Esquina inferior izquierda
+			  neighbors[0][0] = 0;  neighbors[0][1] = height - 2;
+			  neighbors[1][0] = 0;  neighbors[1][1] = height - 2;
+			  neighbors[2][0] = 1;  neighbors[2][1] = height - 2;
+			  neighbors[3][0] = 0;  neighbors[3][1] = height - 1;
+			  neighbors[4][0] = 0;  neighbors[4][1] = height - 1;
+			  neighbors[5][0] = 1;  neighbors[5][1] = height - 1;
+			  neighbors[6][0] = 0;  neighbors[6][1] = height - 1;
+			  neighbors[7][0] = 0;  neighbors[7][1] = height - 1;
+			  neighbors[8][0] = 1;  neighbors[8][1] = height - 1;
+		  } else {
+			  // Borde izquierdo
+			  neighbors[0][0] = 0;  neighbors[0][1] = y - 1;
+			  neighbors[1][0] = 0;  neighbors[1][1] = y - 1;
+			  neighbors[2][0] = 1;  neighbors[2][1] = y - 1;
+			  neighbors[3][0] = 0;  neighbors[3][1] = y;
+			  neighbors[4][0] = 0;  neighbors[4][1] = y;
+			  neighbors[5][0] = 1;  neighbors[5][1] = y;
+			  neighbors[6][0] = 0;  neighbors[6][1] = y + 1;
+			  neighbors[7][0] = 0;  neighbors[7][1] = y + 1;
+			  neighbors[8][0] = 1;  neighbors[8][1] = y + 1;
+		  }
+	  } else if(x == width - 1){
+		  if(y == 0){
+			  // Esquina superior derecha
+			  neighbors[0][0] = width - 2;  neighbors[0][1] = 0;
+			  neighbors[1][0] = width - 1;  neighbors[1][1] = 0;
+			  neighbors[2][0] = width - 1;  neighbors[2][1] = 0;
+			  neighbors[3][0] = width - 2;  neighbors[3][1] = 0;
+			  neighbors[4][0] = width - 1;  neighbors[4][1] = 0;
+			  neighbors[5][0] = width - 1;  neighbors[5][1] = 0;
+			  neighbors[6][0] = width - 2;  neighbors[6][1] = 1;
+			  neighbors[7][0] = width - 1;  neighbors[7][1] = 1;
+			  neighbors[8][0] = width - 1;  neighbors[8][1] = 1;
+		  }else if(y == height - 1 ){
+			  // Esquina inferior derecha
+			  neighbors[0][0] = width - 2;  neighbors[0][1] = height - 2;
+			  neighbors[1][0] = width - 1;  neighbors[1][1] = height - 2;
+			  neighbors[2][0] = width - 1;  neighbors[2][1] = height - 2;
+			  neighbors[3][0] =	width - 2;  neighbors[3][1] = height - 1;
+			  neighbors[4][0] = width - 1;  neighbors[4][1] = height - 1;
+			  neighbors[5][0] = width - 1;  neighbors[5][1] = height - 1;
+			  neighbors[6][0] = width - 2;  neighbors[6][1] = height - 1;
+			  neighbors[7][0] = width - 1;  neighbors[7][1] = height - 1;
+			  neighbors[8][0] = width - 1;  neighbors[8][1] = height - 1;
+		  }else{
+			  //  Borde derecho
+			  neighbors[0][0] = width - 2;  neighbors[0][1] = y - 1;
+			  neighbors[1][0] = width - 1;  neighbors[1][1] = y - 1;
+			  neighbors[2][0] = width - 1;  neighbors[2][1] = y - 1;
+			  neighbors[3][0] = width - 2;  neighbors[3][1] = 	  y;
+			  neighbors[4][0] = width - 1;  neighbors[4][1] =     y;
+			  neighbors[5][0] =	width - 1;  neighbors[5][1] =     y;
+			  neighbors[6][0] = width - 2;  neighbors[6][1] = y + 1;
+			  neighbors[7][0] = width - 1;  neighbors[7][1] = y + 1;
+			  neighbors[8][0] = width - 1;  neighbors[8][1] = y + 1;
+		  }
+	  } else if(y == 0){
+		  // Borde superior
+		  neighbors[0][0] = x - 1;  neighbors[0][1] = 0;
+		  neighbors[1][0] = 	x;  neighbors[1][1] = 0;
+		  neighbors[2][0] = x + 1;  neighbors[2][1] = 0;
+		  neighbors[3][0] = x - 1;  neighbors[3][1] = 0;
+		  neighbors[4][0] = 	x;  neighbors[4][1] = 0;
+		  neighbors[5][0] = x + 1;  neighbors[5][1] = 0;
+		  neighbors[6][0] = x - 1;  neighbors[6][1] = 1;
+		  neighbors[7][0] =     x;  neighbors[7][1] = 1;
+		  neighbors[8][0] = x + 1;  neighbors[8][1] = 1;
+	  } else if(y == height - 1){
+		  // Borde inferior
+		  neighbors[0][0] = x - 1;  neighbors[0][1] = height - 2;
+		  neighbors[1][0] = 	x;  neighbors[1][1] = height - 2;
+		  neighbors[2][0] = x + 1;  neighbors[2][1] = height - 2;
+		  neighbors[3][0] = x - 1;  neighbors[3][1] = height - 1;
+		  neighbors[4][0] = 	x;  neighbors[4][1] = height - 1;
+		  neighbors[5][0] = x + 1;  neighbors[5][1] = height - 1;
+		  neighbors[6][0] = x - 1;  neighbors[6][1] = height - 1;
+		  neighbors[7][0] =     x;  neighbors[7][1] = height - 1;
+		  neighbors[8][0] = x + 1;  neighbors[8][1] = height - 1;
+	  } else {
+		  // Centro
+		  neighbors[0][0] = x - 1;  neighbors[0][1] = y - 1;
+		  neighbors[1][0] = 	x;  neighbors[1][1] = y - 1;
+		  neighbors[2][0] = x + 1;  neighbors[2][1] = y - 1;
+		  neighbors[3][0] = x - 1;  neighbors[3][1] = y;
+		  neighbors[4][0] = 	x;  neighbors[4][1] = y;
+		  neighbors[5][0] = x + 1;  neighbors[5][1] = y;
+		  neighbors[6][0] = x - 1;  neighbors[6][1] = y + 1;
+		  neighbors[7][0] = 	x;  neighbors[7][1] = y + 1;
+		  neighbors[8][0] = x + 1;  neighbors[8][1] = y + 1;
+	  }	
+	  return neighbors;
+}
   
   /**
    * neighbors(int x, int y) returns a list containing the coordinates of each of the pixel neighborgs. With the location of the pixel at (x,y)
@@ -181,8 +312,8 @@ public int[][] neighbors(int x, int y){
 	  // Initialize neighbor array
 	  int[][] neighbors = new int[9][2];
 	  for(int i = 0; i < 9; i++){
-		  neighbors[i][0] = -1;
-		  neighbors[i][1] = -1;
+		  neighbors[i][0] = -2;
+		  neighbors[i][1] = -2;
 	  }
 	  if(x==0){
 		  if(y == 0){
@@ -249,36 +380,48 @@ public int[][] neighbors(int x, int y){
 		  neighbors[0][0] = x - 1;  neighbors[0][1] = y - 1;
 		  neighbors[1][0] = 	x;  neighbors[1][1] = y - 1;
 		  neighbors[2][0] = x + 1;  neighbors[2][1] = y - 1;
-		  neighbors[3][0] = x - 1;  neighbors[1][1] = y;
+		  neighbors[3][0] = x - 1;  neighbors[3][1] = y;
 		  neighbors[4][0] = 	x;  neighbors[4][1] = y;
 		  neighbors[5][0] = x + 1;  neighbors[5][1] = y;
 		  neighbors[6][0] = x - 1;  neighbors[6][1] = y + 1;
 		  neighbors[7][0] = 	x;  neighbors[7][1] = y + 1;
 		  neighbors[8][0] = x + 1;  neighbors[8][1] = y + 1;
-	  }
+	  }	
 	  return neighbors;
   }
   
   public int[] avgColors(int x, int y){
-	  
+	  	  
+	  // Array to store the three averages for each pixel  color.
 	  int[] avgResult = new int[3];
 	  
+	  // Red average
 	  avgResult[0] = 0;
+	  // Green average	  
 	  avgResult[1] = 0;
+	  // Blue average
 	  avgResult[2] = 0;
 	  
+	  // Get a list of the locations of the neighbors of the pixel located
+	  // at position (x,y)
 	  int[][] vecinos = this.neighbors(x, y);
+	  
+	  // Calculates the sum of the values for each color (red, green, blue) 
+	  // for the list of neighbors
 	  int[] sums = new int[3];
-	  	  	  
-	  for(int k = 0; k < vecinos.length; k++){
+	  
+	  int k = 0;			  
+	  while(k < vecinos.length && vecinos[k][0] != -2 ){
 		  sums[0] = sums[0] + this.getRed(vecinos[k][0], vecinos[k][1]);
 		  sums[1] = sums[1] + this.getGreen(vecinos[k][0], vecinos[k][1]);
-		  sums[2] = sums[2] + this.getGreen(vecinos[k][0], vecinos[k][1]);
-	  }
+		  sums[2] = sums[2] + this.getBlue(vecinos[k][0], vecinos[k][1]);
+		  k++;
+	  }  
 	  
-	  avgResult[0] = sums[0]/vecinos.length;
-	  avgResult[1] = sums[1]/vecinos.length;
-	  avgResult[2] = sums[2]/vecinos.length;	  
+	  // Calculates the averages for each color.	  
+	  avgResult[0] = sums[0]/k;
+	  avgResult[1] = sums[1]/k;
+	  avgResult[2] = sums[2]/k;	  
 	  	  
 	  return avgResult;
   }
@@ -323,11 +466,117 @@ public int[][] neighbors(int x, int y){
    * @return a grayscale PixImage representing the edges of the input image.
    * Whiter pixels represent stronger edges.
    */
-  public PixImage sobelEdges() {
-    // Replace the following line with your solution.
-    return this;
+  public PixImage sobelEdges() {	  	
+	  PixImage outPutPixImage = new PixImage(width, height);
+	  long energy = 0L;
+	  
+	  for(int i = 0; i < width; i ++){
+		  for(int j = 0; j < height; j++){
+			  energy = (long)gradientRed(i,j)[0]   * (long)gradientRed(i,j)[0]   +
+					   (long)gradientRed(i,j)[1]   * (long)gradientRed(i,j)[1]   +
+					   (long)gradientBlue(i,j)[0]  * (long)gradientBlue(i,j)[0]  +
+					   (long)gradientBlue(i,j)[1]  * (long)gradientBlue(i,j)[1]  +
+					   (long)gradientGreen(i,j)[0] * (long)gradientGreen(i,j)[0] +
+					   (long)gradientGreen(i,j)[1] * (long)gradientGreen(i,j)[1];		 
+			  outPutPixImage.setPixel(i, j, mag2gray(energy) ,mag2gray(energy), mag2gray(energy));
+		  }
+	  }	  
+	  return outPutPixImage;
     // Don't forget to use the method mag2gray() above to convert energies to
     // pixel intensities.
+  }
+  
+  public int[] gradientRed(int x, int y){
+	  // S_x: Sobel x	 
+	  int[][] S_x = {{1,0,-1},{2,0,-2},{1,0,-1}};
+	  // S_y: Sobel y
+	  int[][] S_y = {{1,2,1},{0,0,0},{-1,-2,-1}};
+	  
+	  int[] grad = {0,0};
+	  
+	  grad[0] = S_x[0][0]*getRed(neighbors(x,y,true)[0][0],neighbors(x,y,true)[0][1]) +
+			    S_x[0][1]*getRed(neighbors(x,y,true)[1][0],neighbors(x,y,true)[1][1]) +
+			    S_x[0][2]*getRed(neighbors(x,y,true)[2][0],neighbors(x,y,true)[2][1]) +
+			    S_x[1][0]*getRed(neighbors(x,y,true)[3][0],neighbors(x,y,true)[3][1]) +
+			    S_x[1][1]*getRed(neighbors(x,y,true)[4][0],neighbors(x,y,true)[4][1]) +
+			    S_x[1][2]*getRed(neighbors(x,y,true)[5][0],neighbors(x,y,true)[5][1]) +
+			    S_x[2][0]*getRed(neighbors(x,y,true)[6][0],neighbors(x,y,true)[6][1]) +
+			    S_x[2][1]*getRed(neighbors(x,y,true)[7][0],neighbors(x,y,true)[7][1]) +
+			    S_x[2][2]*getRed(neighbors(x,y,true)[8][0],neighbors(x,y,true)[8][1]);
+	  
+	  grad[1] = S_y[0][0]*getRed(neighbors(x,y,true)[0][0],neighbors(x,y,true)[0][1]) +
+			    S_y[0][1]*getRed(neighbors(x,y,true)[1][0],neighbors(x,y,true)[1][1]) +
+			    S_y[0][2]*getRed(neighbors(x,y,true)[2][0],neighbors(x,y,true)[2][1]) +
+			    S_y[1][0]*getRed(neighbors(x,y,true)[3][0],neighbors(x,y,true)[3][1]) +
+			    S_y[1][1]*getRed(neighbors(x,y,true)[4][0],neighbors(x,y,true)[4][1]) +
+			    S_y[1][2]*getRed(neighbors(x,y,true)[5][0],neighbors(x,y,true)[5][1]) +
+			    S_y[2][0]*getRed(neighbors(x,y,true)[6][0],neighbors(x,y,true)[6][1]) +
+			    S_y[2][1]*getRed(neighbors(x,y,true)[7][0],neighbors(x,y,true)[7][1]) +
+			    S_y[2][2]*getRed(neighbors(x,y,true)[8][0],neighbors(x,y,true)[8][1]);
+	  
+	  return grad;
+  }
+  
+  public int[] gradientBlue(int x, int y){
+	  // S_x: Sobel x	 
+	  int[][] S_x = {{1,0,-1},{2,0,-2},{1,0,-1}};
+	  // S_y: Sobel y
+	  int[][] S_y = {{1,2,1},{0,0,0},{-1,-2,-1}};
+	  
+	  int[] grad = {0,0};
+	  
+	  grad[0] = S_x[0][0]*getBlue(neighbors(x,y,true)[0][0],neighbors(x,y,true)[0][1]) +
+			    S_x[0][1]*getBlue(neighbors(x,y,true)[1][0],neighbors(x,y,true)[1][1]) +
+			    S_x[0][2]*getBlue(neighbors(x,y,true)[2][0],neighbors(x,y,true)[2][1]) +
+			    S_x[1][0]*getBlue(neighbors(x,y,true)[3][0],neighbors(x,y,true)[3][1]) +
+			    S_x[1][1]*getBlue(neighbors(x,y,true)[4][0],neighbors(x,y,true)[4][1]) +
+			    S_x[1][2]*getBlue(neighbors(x,y,true)[5][0],neighbors(x,y,true)[5][1]) +
+			    S_x[2][0]*getBlue(neighbors(x,y,true)[6][0],neighbors(x,y,true)[6][1]) +
+			    S_x[2][1]*getBlue(neighbors(x,y,true)[7][0],neighbors(x,y,true)[7][1]) +
+			    S_x[2][2]*getBlue(neighbors(x,y,true)[8][0],neighbors(x,y,true)[8][1]);
+	  
+	  grad[1] = S_y[0][0]*getBlue(neighbors(x,y,true)[0][0],neighbors(x,y,true)[0][1]) +
+			    S_y[0][1]*getBlue(neighbors(x,y,true)[1][0],neighbors(x,y,true)[1][1]) +
+			    S_y[0][2]*getBlue(neighbors(x,y,true)[2][0],neighbors(x,y,true)[2][1]) +
+			    S_y[1][0]*getBlue(neighbors(x,y,true)[3][0],neighbors(x,y,true)[3][1]) +
+			    S_y[1][1]*getBlue(neighbors(x,y,true)[4][0],neighbors(x,y,true)[4][1]) +
+			    S_y[1][2]*getBlue(neighbors(x,y,true)[5][0],neighbors(x,y,true)[5][1]) +
+			    S_y[2][0]*getBlue(neighbors(x,y,true)[6][0],neighbors(x,y,true)[6][1]) +
+			    S_y[2][1]*getBlue(neighbors(x,y,true)[7][0],neighbors(x,y,true)[7][1]) +
+			    S_y[2][2]*getBlue(neighbors(x,y,true)[8][0],neighbors(x,y,true)[8][1]);
+	  
+	  return grad;
+  }
+  
+  public int[] gradientGreen(int x, int y){
+	  // S_x: Sobel x	 
+	  int[][] S_x = {{1,0,-1},{2,0,-2},{1,0,-1}};
+	  // S_y: Sobel y
+	  int[][] S_y = {{1,2,1},{0,0,0},{-1,-2,-1}};
+	  
+	  int[] grad = {0,0};
+	  
+	  grad[0] = S_x[0][0]*getGreen(neighbors(x,y,true)[0][0],neighbors(x,y,true)[0][1]) +
+			    S_x[0][1]*getGreen(neighbors(x,y,true)[1][0],neighbors(x,y,true)[1][1]) +
+			    S_x[0][2]*getGreen(neighbors(x,y,true)[2][0],neighbors(x,y,true)[2][1]) +
+			    S_x[1][0]*getGreen(neighbors(x,y,true)[3][0],neighbors(x,y,true)[3][1]) +
+			    S_x[1][1]*getGreen(neighbors(x,y,true)[4][0],neighbors(x,y,true)[4][1]) +
+			    S_x[1][2]*getGreen(neighbors(x,y,true)[5][0],neighbors(x,y,true)[5][1]) +
+			    S_x[2][0]*getGreen(neighbors(x,y,true)[6][0],neighbors(x,y,true)[6][1]) +
+			    S_x[2][1]*getGreen(neighbors(x,y,true)[7][0],neighbors(x,y,true)[7][1]) +
+			    S_x[2][2]*getGreen(neighbors(x,y,true)[8][0],neighbors(x,y,true)[8][1]);
+	  
+	  grad[1] = S_y[0][0]*getGreen(neighbors(x,y,true)[0][0],neighbors(x,y,true)[0][1]) +
+			    S_y[0][1]*getGreen(neighbors(x,y,true)[1][0],neighbors(x,y,true)[1][1]) +
+			    S_y[0][2]*getGreen(neighbors(x,y,true)[2][0],neighbors(x,y,true)[2][1]) +
+			    S_y[1][0]*getGreen(neighbors(x,y,true)[3][0],neighbors(x,y,true)[3][1]) +
+			    S_y[1][1]*getGreen(neighbors(x,y,true)[4][0],neighbors(x,y,true)[4][1]) +
+			    S_y[1][2]*getGreen(neighbors(x,y,true)[5][0],neighbors(x,y,true)[5][1]) +
+			    S_y[2][0]*getGreen(neighbors(x,y,true)[6][0],neighbors(x,y,true)[6][1]) +
+			    S_y[2][1]*getGreen(neighbors(x,y,true)[7][0],neighbors(x,y,true)[7][1]) +
+			    S_y[2][2]*getGreen(neighbors(x,y,true)[8][0],neighbors(x,y,true)[8][1]);
+	  
+	  return grad;
   }
 
 
@@ -365,11 +614,10 @@ public int[][] neighbors(int x, int y){
     int width = pixels.length;
     int height = pixels[0].length;
     PixImage image = new PixImage(width, height);
-
+    
     for (int x = 0; x < width; x++) {
       for (int y = 0; y < height; y++) {
-        image.setPixel(x, y, (short) pixels[x][y], (short) pixels[x][y],
-                       (short) pixels[x][y]);
+        image.setPixel(x, y, (short) pixels[x][y], (short) pixels[x][y], (short) pixels[x][y]);
       }
     }
 
