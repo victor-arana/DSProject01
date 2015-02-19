@@ -31,15 +31,21 @@ public class RunLengthEncoding implements Iterable {
    *  Define any variables associated with a RunLengthEncoding object here.
    *  These variables MUST be private.
    */
-
-
-
+   private DList runLengthEncoding;
 
   /**
    *  The following methods are required for Part II.
    */
 
-  /**
+  public DList getRunLengthEncoding() {
+	return runLengthEncoding;
+}
+
+public void setRunLengthEncoding(DList runLengthEncoding) {
+	this.runLengthEncoding = runLengthEncoding;
+}
+
+/**
    *  RunLengthEncoding() (with two parameters) constructs a run-length
    *  encoding of a black PixImage of the specified width and height, in which
    *  every pixel has red, green, and blue intensities of zero.
